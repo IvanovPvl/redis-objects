@@ -16,9 +16,10 @@ class Counter
     /** @var string */
     private $key;
 
+    /** @var int */
     private $initial = 0;
 
-    public function __construct(string $modelName, int $id, $fieldName, int $initial = 0)
+    public function __construct(string $modelName, $id, $fieldName, int $initial = 0)
     {
         $this->key = "$modelName:$id:$fieldName";
         $this->initial = $initial;

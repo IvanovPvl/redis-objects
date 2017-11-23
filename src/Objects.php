@@ -11,6 +11,9 @@ namespace Redis;
  */
 trait Objects
 {
+    /** @var string */
+    private $redisIdField = 'id';
+
     /** @var Counter[] */
     private $counters = [];
 
@@ -36,10 +39,25 @@ trait Objects
     /**
      * @param string $field
      * @param int    $initial
+     *
+     * @throws \Exception
      */
     public function addCounter(string $field, int $initial = 0): void
     {
-        $counter = new Counter(get_called_class(), $this->id, $field, $initial);
+        $idValue = $this->{$this->redisIdField};
+        if (!$idValue) {
+            throw new \Exception("No {$this->redisIdField} provided for model");
+        }
+
+        $counter = new Counter(get_called_class(), $this->{$this->redisIdField}, $field, $initial);
         $this->counters[$field] = $counter;
+    }
+
+    /**
+     * @param string $redisIdField
+     */
+    public function setRedisIdField(string $redisIdField)
+    {
+        $this->redisIdField = $redisIdField;
     }
 }
