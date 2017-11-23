@@ -16,9 +16,12 @@ class Counter
     /** @var string */
     private $key;
 
-    public function __construct(string $modelName, int $id, $fieldName)
+    private $initial = 0;
+
+    public function __construct(string $modelName, int $id, $fieldName, int $initial = 0)
     {
         $this->key = "$modelName:$id:$fieldName";
+        $this->initial = $initial;
     }
 
     /**
@@ -27,7 +30,7 @@ class Counter
     public function setConnection(Connection $connection): void
     {
         $this->redis = $connection->getRedis();
-        $this->redis->setnx($this->key, 0);
+        $this->redis->setnx($this->key, $this->initial);
     }
 
     /**
@@ -47,10 +50,18 @@ class Counter
     }
 
     /**
-     * @return mixed
+     * @param int $value
      */
-    public function getValue()
+    public function reset(int $value = 0): void
     {
-        return $this->redis->get($this->key);
+        $this->redis->set($this->key, $value);
+    }
+
+    /**
+     * @return int
+     */
+    public function getValue(): int
+    {
+        return (int)$this->redis->get($this->key);
     }
 }

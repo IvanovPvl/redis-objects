@@ -35,10 +35,11 @@ trait Objects
 
     /**
      * @param string $field
+     * @param int    $initial
      */
-    public function addCounter(string $field): void
+    public function addCounter(string $field, int $initial = 0): void
     {
-        $counter = new Counter(get_called_class(), $this->id, $field);
+        $counter = new Counter(get_called_class(), $this->id, $field, $initial);
         $this->counters[$field] = $counter;
     }
 }
