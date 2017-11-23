@@ -18,7 +18,7 @@ trait Objects
     private $counters = [];
 
     /** @var Connection */
-    private $connection;
+    private static $connection;
 
     public function __get($name)
     {
@@ -34,10 +34,20 @@ trait Objects
      */
     public function setRedis(Connection $connection): void
     {
-        $this->connection = $connection;
+        self::$connection = $connection;
         foreach ($this->counters as $counter) {
             $counter->setConnection($connection);
         }
+    }
+
+    public static function setCurrentRedis(Connection $connection): void
+    {
+        self::$connection = $connection;
+    }
+
+    public static function getCurrentRedis(): \Redis
+    {
+        return self::$connection->getRedis();
     }
 
     /**
@@ -45,7 +55,7 @@ trait Objects
      */
     public function getRedis(): \Redis
     {
-        return $this->connection->getRedis();
+        return self::$connection->getRedis();
     }
 
     /**
@@ -61,7 +71,7 @@ trait Objects
             throw new \Exception("No {$this->redisIdField} provided for model");
         }
 
-        $counter = new Counter(get_called_class(), $this->{$this->redisIdField}, $field, $initial);
+        $counter = new Counter($field, $initial, get_called_class(), $this->{$this->redisIdField});
         $this->counters[$field] = $counter;
     }
 

@@ -19,10 +19,20 @@ class Counter
     /** @var int */
     private $initial = 0;
 
-    public function __construct(string $modelName, $id, $fieldName, int $initial = 0)
+    public function __construct(string $fieldName, int $initial = 0, string $modelName = '', $id = 0)
     {
-        $this->key = "$modelName:$id:$fieldName";
+        if ($modelName && $id) {
+            $this->key = "$modelName:$id:$fieldName";
+        } else {
+            $this->key = $fieldName;
+        }
+
         $this->initial = $initial;
+
+        if ($redis = Objects::getCurrentRedis()) {
+            $this->redis = $redis;
+            $this->redis->setnx($this->key, $this->initial);
+        }
     }
 
     /**
@@ -35,19 +45,45 @@ class Counter
     }
 
     /**
-     * @param int $by
+     * @param int           $by
+     * @param callable|null $func
+     *
+     * @throws \Throwable
      */
-    public function increment(int $by = 1): void
+    public function increment(int $by = 1, callable $func = null): void
     {
-        $this->redis->incrBy($this->key, $by);
+        if ($func) {
+            try {
+                $this->increment($by);
+                $func();
+            } catch (\Throwable $e) {
+                $this->decrement($by);
+                throw $e;
+            }
+        } else {
+            $this->redis->incrBy($this->key, $by);
+        }
     }
 
     /**
-     * @param int $by
+     * @param int           $by
+     * @param callable|null $func
+     *
+     * @throws \Throwable
      */
-    public function decrement(int $by = 1): void
+    public function decrement(int $by = 1, callable $func = null): void
     {
-        $this->redis->decrBy($this->key, $by);
+        if ($func) {
+            try {
+                $this->decrement($by);
+                $func();
+            } catch (\Throwable $e) {
+                $this->increment($by);
+                throw $e;
+            }
+        } else {
+            $this->redis->decrBy($this->key, $by);
+        }
     }
 
     /**
