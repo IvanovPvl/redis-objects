@@ -17,6 +17,9 @@ trait Objects
     /** @var Counter[] */
     private $counters = [];
 
+    /** @var Connection */
+    private $connection;
+
     public function __get($name)
     {
         if ($this->counters && key_exists($name, $this->counters)) {
@@ -29,11 +32,20 @@ trait Objects
     /**
      * @param Connection $connection
      */
-    public function setConnection(Connection $connection): void
+    public function setRedis(Connection $connection): void
     {
+        $this->connection = $connection;
         foreach ($this->counters as $counter) {
             $counter->setConnection($connection);
         }
+    }
+
+    /**
+     * @return \Redis
+     */
+    public function getRedis(): \Redis
+    {
+        return $this->connection->getRedis();
     }
 
     /**
