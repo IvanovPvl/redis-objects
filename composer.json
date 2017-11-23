@@ -1,0 +1,25 @@
+{
+    "name": "ivanovpvl/redis-objects",
+    "description": "Map Redis types directly to PHP objects",
+    "keywords": ["redis"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pavel Ivanov",
+            "email": "ivanvpvl@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Redis\\": "src/",
+            "Tests\\": "tests/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "require": {
+        "php": ">=7.1.0"
+    }
+}
